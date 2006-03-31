@@ -1,0 +1,2 @@
+* layout on resize
+* win32/linux "OK" button

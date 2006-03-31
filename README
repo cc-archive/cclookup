@@ -1,0 +1,15 @@
+ccLookup
+0.8.7 
+21 October 2004
+
+ccLookup is a tool for confirming the license claim embedded in digital 
+audio files matches the license claim published on the web.  ccLookup 
+currently supports MP3 files.
+
+ccLookup may be run from the distribution directory.  Alternatively, the
+.so support files may be placed anywhere on the system path.  The 
+executable, lookup, and user interface definition, lookup.xrc, must remain
+in the same directory.
+
+Linux builds are still somewhat experimental; please report any problems
+or suggestions to the author, Nathan Yergler <nathan@creativecommons.org>.

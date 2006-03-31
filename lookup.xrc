@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<resource>
+  <object class="wxFrame" name="FRM_MAIN">
+    <title>Lookup</title>
+    <centered>1</centered>
+    <size>500,375</size>
+    <object class="wxGridBagSizer">
+      <object class="sizeritem">
+        <object class="wxPanel">
+          <bg>#729cb3</bg>
+          <object class="wxFlexGridSizer">
+            <cols>3</cols>
+            <object class="spacer">
+              <size>5,5</size>
+            </object>
+            <object class="sizeritem">
+              <object class="wxFlexGridSizer">
+                <cols>1</cols>
+                <object class="spacer">
+                  <size>12,12</size>
+                </object>
+                <object class="sizeritem">
+                  <object class="wxStaticText" name="LBL_HEADER_TEXT">
+                    <label>Is this file Creative Commons licensed?</label>
+                    <font>
+                      <size>16</size>
+                      <style>default</style>
+                      <weight>bold</weight>
+                      <family>bold</family>
+                      <underlined>False</underlined>
+                      <face>Sans</face>
+                    </font>
+                  </object>
+                  <flag>wxEXPAND|wxALIGN_CENTRE_VERTICAL</flag>
+                </object>
+                <growablecols>0</growablecols>
+              </object>
+              <flag>wxEXPAND</flag>
+            </object>
+            <object class="sizeritem">
+              <object class="wxStaticBitmap">
+                <bitmap>publishguy_small.gif</bitmap>
+              </object>
+            </object>
+            <growablecols>1</growablecols>
+            <growablerows>0</growablerows>
+          </object>
+        </object>
+        <flag>wxEXPAND</flag>
+        <border>5</border>
+        <cellpos>0,0</cellpos>
+        <cellspan>1,1</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxNotebook" name="NTB_MAIN">
+          <object class="notebookpage">
+            <label>License</label>
+            <object class="wxPanel" name="PNL_LICENSE">
+              <object class="wxBoxSizer">
+                <orient>wxVERTICAL</orient>
+              </object>
+            </object>
+            <selected>1</selected>
+          </object>
+          <usenotebooksizer>1</usenotebooksizer>
+          <object class="notebookpage">
+            <label>Details</label>
+            <object class="wxPanel" name="PNL_DETAILS">
+              <object class="wxBoxSizer">
+                <orient>wxVERTICAL</orient>
+              </object>
+            </object>
+          </object>
+        </object>
+        <flag>wxEXPAND|wxALL</flag>
+        <cellpos>1,0</cellpos>
+        <cellspan>1,1</cellspan>
+      </object>
+      <object class="sizeritem">
+        <object class="wxButton" name="CMD_HELP">
+          <label>How does this work?</label>
+          <default>1</default>
+        </object>
+        <flag>wxALIGN_CENTRE_VERTICAL|wxALIGN_CENTRE_HORIZONTAL</flag>
+        <cellpos>2,0</cellpos>
+        <cellspan>1,1</cellspan>
+      </object>
+      <growablerows>1</growablerows>
+      <growablecols>0</growablecols>
+    </object>
+  </object>
+  <object class="wxMenuBar" name="MB_MAIN">
+    <object class="wxMenu" name="MNU_FILE">
+      <label>&amp;File</label>
+      <object class="wxMenuItem" name="MNU_FILE_OPEN">
+        <label>Open...</label>
+        <accel>Ctrl+O</accel>
+      </object>
+      <object class="wxMenuItem" name="MNU_FILE_QUIT">
+        <label>&amp;Quit</label>
+        <accel>Ctrl+Q</accel>
+      </object>
+    </object>
+    <object class="wxMenu" name="MNU_HELP">
+      <label>&amp;Help</label>
+      <object class="wxMenuItem" name="wxID_ABOUT">
+        <label>About ccLookup</label>
+      </object>
+    </object>
+  </object>
+</resource>

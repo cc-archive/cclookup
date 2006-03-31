@@ -1,0 +1,20 @@
+2004-11-15
+
+* Fixed error in calling verify code (call status, not verify)
+
+* Fixed spelling errors.
+
+2004-10-29
+
+* Vertical alignment lovin'.
+
+2004-10-28
+
+* UI improvments suggested by NP, MH.
+
+2004-10-21
+
+* Added Linux build script
+
+* Added LICENSE, README
+
