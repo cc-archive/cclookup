@@ -1,6 +1,7 @@
 """
 lookup.py
-(c) 2004, Nathan R. Yergler, Creative Commons
+(c) 2004-2006, Nathan R. Yergler, Creative Commons
+licensed to the public under the GNU GPL version 2
 """
 
 import os
@@ -26,8 +27,14 @@ import html
 from html import WebbrowserHtml
 from html import HTML_TEMPLATE, DETAILS_TEMPLATE
 
-XRC_SOURCE = 'lookup.xrc'
-ICON_FILE = 'cc.ico'
+try:
+   root_dir = os.path.abspath(os.path.dirname(__file__))
+           
+except NameError, e:
+   root_dir = os.path.dirname(sys.executable)
+
+XRC_SOURCE = os.path.join(root_dir, 'lookup.xrc')
+ICON_FILE = os.path.join(root_dir, 'cc.ico')
 
 class dropFileTarget(wx.FileDropTarget):
     def __init__(self, window):
@@ -62,8 +69,8 @@ class CcLookupFrame(wx.Frame):
       menubar = self.xrc.LoadMenuBar("MB_MAIN")
       self.SetMenuBar(menubar)
 
-      _icon = wx.Icon(ICON_FILE, wx.BITMAP_TYPE_ICO)
-      self.SetIcon(_icon)
+      # _icon = wx.Icon(ICON_FILE, wx.BITMAP_TYPE_ICO)
+      # self.SetIcon(_icon)
 
       # bind events
       self.Bind(wx.EVT_BUTTON, self.onHelp, XRCCTRL(self, "CMD_HELP"))
@@ -289,7 +296,8 @@ class CcLookupFrame(wx.Frame):
        return "\n".join(result)
 
    def onAbout(self):
-        dlg = about.AboutBox(self, version())
+        # XXX!!!
+        dlg = about.AboutBox(self, "1.0.1.1") #version())
         dlg.ShowModal()
         dlg.Destroy()
 
