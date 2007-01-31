@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 lookup.py
 (c) 2004-2006, Nathan R. Yergler, Creative Commons
@@ -21,11 +23,11 @@ import cctagutils.const
 from cctagutils.const import version
 
 import tagger
-import about
 
 import html
 from html import WebbrowserHtml
 from html import HTML_TEMPLATE, DETAILS_TEMPLATE
+
 
 try:
    root_dir = os.path.abspath(os.path.dirname(__file__))
@@ -51,6 +53,7 @@ class CcLookupFrame(wx.Frame):
 
       # create a handle to the XML resource file
       self.xrc = wx.xrc.EmptyXmlResource()
+      self.xrc.InsertHandler(html.HyperlinkXmlHandler())
       self.xrc.Load(XRC_SOURCE)
 
       # create the frame's skeleton
@@ -296,8 +299,16 @@ class CcLookupFrame(wx.Frame):
        return "\n".join(result)
 
    def onAbout(self):
-        # XXX!!!
-        dlg = about.AboutBox(self, "1.0.1.1") #version())
+        # Create the About dialog and connect the button handler
+        dlg = self.xrc.LoadDialog(self, "DLG_ABOUT")
+        dlg.Bind(wx.EVT_BUTTON, lambda x: dlg.EndModal(0),
+                  XRCCTRL(dlg, "CMD_OK"))
+
+
+        # set the version number
+        XRCCTRL(dlg, "LBL_VERSION").SetLabel("version %s" % version())
+        
+        # show the dialog, then destroy it once it's closed
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -340,7 +351,8 @@ if __name__ == '__main__':
         # set the file path to the XRC resource file
         # to handle the app bundle properly
         XRC_SOURCE = os.path.join(os.path.dirname(sys.argv[0]), XRC_SOURCE)
-        ICON_FILE = os.path.join(os.path.dirname(sys.argv[0]), ICON_FILE)
+        ICON_FILE = os.path.join(os.path.dirname(sys.argv[0]),
+                                 'resources', ICON_FILE)
 
     print sys.argv
-    main(sys.argv)
+    main(sys.argv[1:])
