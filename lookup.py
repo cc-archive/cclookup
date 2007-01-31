@@ -2,7 +2,7 @@
 
 """
 lookup.py
-(c) 2004-2006, Nathan R. Yergler, Creative Commons
+(c) 2004-2007, Nathan R. Yergler, Creative Commons
 licensed to the public under the GNU GPL version 2
 """
 
@@ -26,7 +26,7 @@ import tagger
 
 import html
 from html import WebbrowserHtml
-from html import HTML_TEMPLATE, DETAILS_TEMPLATE
+from html import DETAILS_TEMPLATE
 
 
 try:
@@ -88,12 +88,9 @@ class CcLookupFrame(wx.Frame):
                     wx.SystemSettings_GetColour(wx.SYS_COLOUR_BTNFACE).GetRGB()
 
       # create the HTML container
-      self.__html = WebbrowserHtml(parent = XRCCTRL(self, "PNL_LICENSE"),
-                                   id=-1)
       self.__details = WebbrowserHtml(parent = XRCCTRL(self, "PNL_DETAILS"),
                                       id=-1)
       
-      XRCCTRL(self, "PNL_LICENSE").GetSizer().Add(self.__html, 1, wx.GROW)
       XRCCTRL(self, "PNL_DETAILS").GetSizer().Add(self.__details, 1, wx.GROW)
       
       self.SetAutoLayout(True)
@@ -101,19 +98,19 @@ class CcLookupFrame(wx.Frame):
       # do the final platform-specific layout
       self.__platformLayout()
       self.reset()
-      self.refreshHtml()
+      self.updateInterface()
       
       self.Layout()
 
-   def refreshHtml(self):
-       self.__html.SetPage(HTML_TEMPLATE % (html.BGCOLOR,
-                                            self.fileInfo['filename'],
-                                            self.fileInfo['claim'],
-                                            self.fileInfo['status']
-                                            )
-                           )
+   def updateInterface(self):
 
-       self.__details.SetPage(DETAILS_TEMPLATE % (html.BGCOLOR,
+      # update the basic panel information with the filename, claim, etc
+      XRCCTRL(self, "LBL_FILENAME").SetLabel(self.fileInfo['short_filename'])
+      XRCCTRL(self, "LBL_CLAIM").SetLabel(self.fileInfo['claim'])
+      XRCCTRL(self, "LBL_STATUS").SetLabel(self.fileInfo['status'])
+      
+      # update the details page
+      self.__details.SetPage(DETAILS_TEMPLATE % (html.BGCOLOR,
                                                   self.fileInfo['filename'],
                                                   self.__fileDetails(self.fileInfo['filename'])
                                                   )
@@ -152,11 +149,12 @@ class CcLookupFrame(wx.Frame):
    def reset(self):
        """Reset the GUI for another file."""
        # initialize file info
-       self.fileInfo = {'filename':'&nbsp;',
-                       'claim':'&nbsp;',
-                       'license':'&nbsp;',
-                       'vurl':'&nbsp;',
-                       'status':'&nbsp;'
+       self.fileInfo = {'filename':'',
+                        'short_filename':'',
+                        'claim':'',
+                        'license':'&nbsp;',
+                        'vurl':'&nbsp;',
+                        'status':''
                        }
 
    def autolink(self,text):
@@ -177,10 +175,11 @@ class CcLookupFrame(wx.Frame):
        
        # set the filename label
        self.fileInfo['filename'] = filename
+       self.fileInfo['short_filename'] = os.path.basename(filename)
        self.fileInfo['status'] = 'working...'
 
        # reset the HTML UI
-       self.refreshHtml()
+       self.updateInterface()
 
        # set the cursor to busy
        __cur_cursor = self.GetCursor()
@@ -253,7 +252,7 @@ class CcLookupFrame(wx.Frame):
                    "An error occurred while attempting to retrieve " \
                    "the information page."
 
-       self.refreshHtml()
+       self.updateInterface()
        self.SetCursor(__cur_cursor)
        self.Layout()
 
