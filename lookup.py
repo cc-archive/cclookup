@@ -18,8 +18,7 @@ import wx.xrc
 from wx.xrc import XRCCTRL, XRCID
 
 from cctagutils.metadata import metadata
-import cctagutils.lookup
-import cctagutils.const
+import cctagutils
 from cctagutils.const import version
 
 import tagger
@@ -213,106 +212,33 @@ class CcLookupFrame(wx.Frame):
        for prop in mdata.properties():
           self.fileInfo['metadata'].append((prop, mdata[prop]))
           
-       # check if it actually exists
-       if not claim.strip():
-           # no license; bail out
-           self.fileInfo['license'] = "None."
-           self.fileInfo['status'] = "No embedded license; nothing to verify."
-       else:
-           parts = cctagutils.lookup.parseClaim(claim)
-           self.fileInfo['license'] = self.autolink(parts['license'])
-           self.fileInfo['vurl'] = self.autolink(parts['verify at'])
-           
-           # verify the file
-           try:
-               status = cctagutils.lookup.verify(filename)
-               
-               if status == 1:
-                   self.fileInfo['status'] = 'Metadata at %s agrees with ' \
-                                                        'embedded claim.' % (
-                       self.fileInfo['vurl'])
-                   
-               elif status == 0:
-                   self.fileInfo['status'] = \
-                       "Unable to compare claims;<br>No embedded RDF found " \
-                       "at information URL."
-               elif status == -1:
-                   self.fileInfo['status'] = \
-                       "Unable to verify;\n" \
-                       "RDF does not contain information for this work."
-               elif status == -2:
-                   self.fileInfo['status'] = \
-                       "No match;<br>RDF license found at information URL " \
-                       "does not match embedded claim."
-           except urllib2.HTTPError, e:
-               if e.code == 404:
-                   # verification URL not found
-                   self.fileInfo['status'] = \
-                       "Unable to verify;<br>Information URL not found."
-               else:
-                   self.fileInfo['status'] = "A network error occurred while "\
-                                             "attempting to retrieve the "\
-                                             "information URL from the "\
-                                             "server (%s)" % e.code
-           except urllib2.URLError, e:
-               self.fileInfo['status'] =  "A network error occurred while "\
-                                          "attempting to retrieve the "\
-                                          "information URL (%s)" % e.code
-           except xml.sax.SAXParseException, e:
-               self.fileInfo['status'] = "The verification page contains " \
-                                         "invalid RDF; could not verify " \
-                                         "the license."
-           except Exception, e:
-               # an error occurred while trying to verify the claim...
-               # XXX handle errors intelligently here
-               self.fileInfo['status'] = \
-                   "An error occurred while attempting to retrieve " \
-                   "the information page."
+       # try to verify the claim (if it exists)
+       self.fileInfo['license'] = mdata.getLicense()
+       print  mdata.getLicense()
+       status = mdata.verify()
 
+       # determine the status message
+       if status == cctagutil.VERIFY_VERIFIED:
+          self.fileInfo['status'] = "Embedded license claim verified."
+
+       elif status == cctagutil.VERIFY_NO_RDF:
+          self.fileInfo['status'] = "Unable to compare claims; no verification metadata found."
+
+       elif status == cctagutil.VERIFY_NO_WORK:
+          self.fileInfo['status'] = "Unable to verify; no work information found."
+
+       elif status == cctagutil.VERIFY_NO_MATCH:
+          self.fileInfo['status'] = "Embedded claim does not match verification information."
+
+       elif status == cctagutil.VERIFY_NO_CLAIM:
+          self.fileInfo['status'] = "No verification information found."
+
+       else:
+          self.fileInfo['status'] = ''
+          
        self.updateInterface()
        self.SetCursor(__cur_cursor)
        self.Layout()
-
-   def __fileDetails(self, filename):
-       result = ["""
-<tr>
-  <td VALIGN="TOP" ALIGN="LEFT" height="1">
-     <font size="-1"><strong>Tag&nbsp;Name</strong></font>
-  </td>
-  <td VALIGN="TOP" ALIGN="LEFT" height="1">
-     <font size="-1"><strong>Tag Value</strong></font>
-  </td>
-</tr>"""]
-
-       if filename:
-           try:
-               v2 = tagger.id3v2.ID3v2(filename,
-                                       tagger.constants.ID3_FILE_READ)
-               
-               for frame in v2.frames:
-                   if len(frame.strings) > 0:
-                       oframe = frame.strings[0]
-                   else:
-                       oframe = frame.output_field()
-
-                   oframe = self.autolink(oframe)
-                       
-                   result.append('<tr><td VALIGN="TOP" ALIGN="LEFT">'
-                                 '<font size="-1">%s</font></td>'
-                                 '<td VALIGN=TOP ALIGN=LEFT>'
-                                 '<font size="-1">%s</font></td></tr>' % (
-                       frame.fid,
-                       oframe + "&nbsp;"
-                       )
-                                 )
-           except:
-               pass
-
-       #if len(result) == 
-       #result.append('<tr><td VALIGN=BOTTOM ALIGN=LEFT>&nbsp;</td>'
-       #              '<td VALIGN=BOTTOM ALIGN=LEFT>&nbsp;</td></tr>')
-
-       return "\n".join(result)
 
    def onAbout(self):
         # Create the About dialog and connect the button handler
