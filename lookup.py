@@ -108,20 +108,20 @@ class CcLookupFrame(wx.Frame):
       XRCCTRL(self, "LBL_CLAIM").SetLabel(self.fileInfo['claim'])
       XRCCTRL(self, "LBL_STATUS").SetLabel(self.fileInfo['status'])
 
-      #return
-   
       # update the details page
+      XRCCTRL(self, "LBL_DETAILS_FILENAME").SetLabel(
+         self.fileInfo['short_filename'])
       m_list = XRCCTRL(self, "LST_METADATA")
       
       for key, value in self.fileInfo['metadata']:
-         print key, value
+         if not(value): continue
          
          index = m_list.InsertStringItem(0, str(key))
-         
-         m_list.SetStringItem(index, 1, str(value), -1)
+
+         m_list.SetStringItem(index, 1, str(value).decode('utf8'), -1)
 
       m_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
-      m_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+      m_list.SetColumnWidth(1, wx.LIST_AUTOSIZE)
       
    def __platformLayout(self):
        if sys.platform == 'darwin':

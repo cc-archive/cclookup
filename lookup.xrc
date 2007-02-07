@@ -185,7 +185,7 @@ it contains a Creative Commons license.</label>
                         <vgap>10</vgap>
                         <growablecols>1</growablecols>
                         <object class="sizeritem">
-                          <object class="wxStaticText" name="LBL_FILENAME">
+                          <object class="wxStaticText" name="LBL_DETAILS_FILENAME">
                             <label></label>
                           </object>
                           <flag>wxGROW</flag>
