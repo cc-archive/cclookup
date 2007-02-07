@@ -87,12 +87,11 @@ class CcLookupFrame(wx.Frame):
           html.BGCOLOR = "%X" % \
                     wx.SystemSettings_GetColour(wx.SYS_COLOUR_BTNFACE).GetRGB()
 
-      # create the HTML container
-      self.__details = WebbrowserHtml(parent = XRCCTRL(self, "PNL_DETAILS"),
-                                      id=-1)
-      
-      XRCCTRL(self, "PNL_DETAILS").GetSizer().Add(self.__details, 1, wx.GROW)
-      
+      # configure the metadata list view
+      metadata_list = XRCCTRL(self, "LST_METADATA")
+      metadata_list.InsertColumn(0, "Field")
+      metadata_list.InsertColumn(1, "Value")
+
       self.SetAutoLayout(True)
       
       # do the final platform-specific layout
@@ -108,17 +107,24 @@ class CcLookupFrame(wx.Frame):
       XRCCTRL(self, "LBL_FILENAME").SetLabel(self.fileInfo['short_filename'])
       XRCCTRL(self, "LBL_CLAIM").SetLabel(self.fileInfo['claim'])
       XRCCTRL(self, "LBL_STATUS").SetLabel(self.fileInfo['status'])
-      
-      # update the details page
-      self.__details.SetPage(DETAILS_TEMPLATE % (html.BGCOLOR,
-                                                  self.fileInfo['filename'],
-                                                  self.__fileDetails(self.fileInfo['filename'])
-                                                  )
-                              )
 
+      #return
+   
+      # update the details page
+      m_list = XRCCTRL(self, "LST_METADATA")
+      
+      for key, value in self.fileInfo['metadata']:
+         print key, value
+         
+         index = m_list.InsertStringItem(0, str(key))
+         
+         m_list.SetStringItem(index, 1, str(value), -1)
+
+      m_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+      m_list.SetColumnWidth(0, wx.LIST_AUTOSIZE)
+      
    def __platformLayout(self):
        if sys.platform == 'darwin':
-           self.__html.SetDropTarget(dropFileTarget(self))
            
            # add a border to the notebook
            self.GetSizer().FindItem(XRCCTRL(self, "NTB_MAIN")).SetBorder(10)
@@ -148,15 +154,25 @@ class CcLookupFrame(wx.Frame):
 
    def reset(self):
        """Reset the GUI for another file."""
+
        # initialize file info
        self.fileInfo = {'filename':'',
                         'short_filename':'',
                         'claim':'',
                         'license':'&nbsp;',
                         'vurl':'&nbsp;',
-                        'status':''
+                        'status':'',
+                        'metadata':[],
                        }
 
+       # clear the file details
+       XRCCTRL(self, "LBL_FILENAME").SetLabel(self.fileInfo['short_filename'])
+       XRCCTRL(self, "LBL_CLAIM").SetLabel(self.fileInfo['claim'])
+       XRCCTRL(self, "LBL_STATUS").SetLabel(self.fileInfo['status'])
+       
+       # clear the metadata list
+       XRCCTRL(self, "LST_METADATA").DeleteAllItems()
+       
    def autolink(self,text):
         link_regex = re.compile('[a-z]*://[^ \t\n\r\f\v<>"]*')
         added_len = len('<a href=""></a>')
@@ -192,7 +208,11 @@ class CcLookupFrame(wx.Frame):
        mdata = metadata(filename)
        claim = mdata.getClaim()
        self.fileInfo['claim'] = self.autolink(claim)
-       
+
+       # get a mapping of all metadata
+       for prop in mdata.properties():
+          self.fileInfo['metadata'].append((prop, mdata[prop]))
+          
        # check if it actually exists
        if not claim.strip():
            # no license; bail out
@@ -206,9 +226,6 @@ class CcLookupFrame(wx.Frame):
            # verify the file
            try:
                status = cctagutils.lookup.verify(filename)
-               
-               print
-               print 'status: ', status
                
                if status == 1:
                    self.fileInfo['status'] = 'Metadata at %s agrees with ' \
