@@ -172,19 +172,6 @@ class CcLookupFrame(wx.Frame):
        # clear the metadata list
        XRCCTRL(self, "LST_METADATA").DeleteAllItems()
        
-   def autolink(self,text):
-        link_regex = re.compile('[a-z]*://[^ \t\n\r\f\v<>"]*')
-        added_len = len('<a href=""></a>')
-
-        link = link_regex.search(text,0)
-        while link is not None:
-
-           text = '%s<a href="%s">%s</a>%s' % (text[:link.start()], text[link.start():link.end()], text[link.start():link.end()], text[link.end():])
-
-           link = link_regex.search(text, link.end() + added_len + (link.end() - link.start()) )
-
-        return text
-
    def selectFile(self, filename):
        self.reset()
        
@@ -205,8 +192,7 @@ class CcLookupFrame(wx.Frame):
        
        # retrieve the license claim
        mdata = metadata(filename)
-       claim = mdata.getClaim()
-       self.fileInfo['claim'] = self.autolink(claim)
+       self.fileInfo['claim'] = mdata.getClaim()
 
        # get a mapping of all metadata
        for prop in mdata.properties():
