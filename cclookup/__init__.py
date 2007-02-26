@@ -23,10 +23,7 @@ from cctagutils.const import version
 
 import tagger
 
-import html
-from html import WebbrowserHtml
-from html import DETAILS_TEMPLATE
-
+import cclookup.html
 
 try:
    root_dir = os.path.abspath(os.path.dirname(__file__))
@@ -52,7 +49,7 @@ class CcLookupFrame(wx.Frame):
 
       # create a handle to the XML resource file
       self.xrc = wx.xrc.EmptyXmlResource()
-      self.xrc.InsertHandler(html.HyperlinkXmlHandler())
+      self.xrc.InsertHandler(cclookup.html.HyperlinkXmlHandler())
       self.xrc.Load(XRC_SOURCE)
 
       # create the frame's skeleton
@@ -81,10 +78,6 @@ class CcLookupFrame(wx.Frame):
       self.initLayout()
 
    def initLayout(self):
-      # check the background color
-      if sys.platform != 'darwin':
-          html.BGCOLOR = "%X" % \
-                    wx.SystemSettings_GetColour(wx.SYS_COLOUR_BTNFACE).GetRGB()
 
       # configure the metadata list view
       metadata_list = XRCCTRL(self, "LST_METADATA")
@@ -112,7 +105,9 @@ class CcLookupFrame(wx.Frame):
          self.fileInfo['short_filename'])
       m_list = XRCCTRL(self, "LST_METADATA")
       
-      for key, value in self.fileInfo['metadata']:
+      for key in self.fileInfo['metadata'].properties():
+         value = self.fileInfo['metadata'][key]
+         
          if not(value): continue
          
          index = m_list.InsertStringItem(0, str(key))
@@ -161,7 +156,7 @@ class CcLookupFrame(wx.Frame):
                         'license':'&nbsp;',
                         'vurl':'&nbsp;',
                         'status':'',
-                        'metadata':[],
+                        'metadata':cctagutils.handler.base.BaseMetadata(''),
                        }
 
        # clear the file details
@@ -180,7 +175,7 @@ class CcLookupFrame(wx.Frame):
        self.fileInfo['short_filename'] = os.path.basename(filename)
        self.fileInfo['status'] = 'working...'
 
-       # reset the HTML UI
+       # reset the UI
        self.updateInterface()
 
        # set the cursor to busy
@@ -190,33 +185,26 @@ class CcLookupFrame(wx.Frame):
        # update the app
        wx.Yield()
        
-       # retrieve the license claim
-       mdata = metadata(filename)
-       self.fileInfo['claim'] = mdata.getClaim()
-
-       # get a mapping of all metadata
-       for prop in mdata.properties():
-          self.fileInfo['metadata'].append((prop, mdata[prop]))
+       # retrieve the file metadata
+       self.fileInfo['metadata'] = mdata = metadata(filename)
           
-       # try to verify the claim (if it exists)
-       self.fileInfo['license'] = mdata.getLicense()
-       print  mdata.getLicense()
+       # try to verify the license claim (if it exists)
        status = mdata.verify()
 
        # determine the status message
-       if status == cctagutil.VERIFY_VERIFIED:
+       if status == cctagutils.VERIFY_VERIFIED:
           self.fileInfo['status'] = "Embedded license claim verified."
 
-       elif status == cctagutil.VERIFY_NO_RDF:
+       elif status == cctagutils.VERIFY_NO_RDF:
           self.fileInfo['status'] = "Unable to compare claims; no verification metadata found."
 
-       elif status == cctagutil.VERIFY_NO_WORK:
+       elif status == cctagutils.VERIFY_NO_WORK:
           self.fileInfo['status'] = "Unable to verify; no work information found."
 
-       elif status == cctagutil.VERIFY_NO_MATCH:
+       elif status == cctagutils.VERIFY_NO_MATCH:
           self.fileInfo['status'] = "Embedded claim does not match verification information."
 
-       elif status == cctagutil.VERIFY_NO_CLAIM:
+       elif status == cctagutils.VERIFY_NO_CLAIM:
           self.fileInfo['status'] = "No verification information found."
 
        else:

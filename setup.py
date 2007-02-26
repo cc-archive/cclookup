@@ -13,62 +13,60 @@ import sys
 import shutil
 import fnmatch
 
-from distutils.core import setup
-from cctagutils.const import version
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-packageroot = "."
-
-def cleanManifest():
-    try:
-        os.remove('MANIFEST')
-    except:
-        pass
-    
-datafiles = [('', ['lookup.xrc',
-          			os.path.join('resources','cc.ico'),
-          			os.path.join('resources', 'publishguy_small.gif'),
-          			'version.txt',
-          			]
-          	),
-    		]
+# set the basics for setup_requires (which is nothing on linux)
+setup_requirements = []
 
 # check for win32 support
 if sys.platform == 'win32':
     # py2exe allows building of executables
+    setup_requirements.append('py2exe')
+    
     import py2exe
 
 if sys.platform == 'darwin':
-	# import Mac OS X-specific packages
-	import py2app
-	
-	datafiles.append(('../Frameworks', []))
-	
-# call the standard distutils builder for the GUI app
-cleanManifest()
+    # import Mac OS X-specific packages
+    setup_requirements.append('py2app')
+    
+    import py2app
 
-setup(name='ccLookup',
-      version=version(),
-      url='http://creativecommons.org',
+    #datafiles.append(('../Frameworks', []))
+
+
+setup(name='cclookup',
+      version='2.0',
+      url='http://wiki.creativecommons.org/CcLookup',
       author='Nathan R. Yergler',
       author_email='nathan@creativecommons.org',
-      py_modules=['lookup', 'about', 'html'],
-      data_files= datafiles,
-      windows=[{'script':'lookup.py',
-                'icon_resources':[(1, os.path.join('resources','cc.ico'))]
-               }],
-      app=['lookup.py'],
-      scripts=['lookup.py', ],
-      packages=['cctagutils', 'tagger', 'ccrdf',
-                'rdflib', 'rdflib.syntax',
-                'rdflib.syntax.serializers', 'rdflib.syntax.parsers',
-                'rdflib.backends', 'rdflib.model',],
+
+      packages = ['cclookup', 'tagger', 'eyeD3'],
+
+      setup_requires = setup_requirements,
+      install_requires = ['setuptools',
+                          'rdflib==2.3.3',
+                          'ccrdf>=0.6a4',
+                          'cctagutils>=0.5a1',
+                          'rdfadict',
+                         ],
+      include_package_data = True,
+      zip_safe = False,
+
+      entry_points = {
+
+    'console_scripts':['cclookup = cclookup:main'],
+    },
+
       options={ "py2exe": {"packages": ["encodings", 'rdflib']},
-    			"py2app": {"argv_emulation": True,
-    						"iconfile": os.path.join('resources', 'cc.icns')
-    						}
-               },
+                "py2app": {"argv_emulation": True,
+                           "iconfile": os.path.join('resources', 'cc.icns')
+                           }
+                },
       )
 
-if ('py2app' in sys.argv):
-	os.system('./make_dmg.sh %s' % version())
+## if ('py2app' in sys.argv):
+## 	os.system('./make_dmg.sh %s' % version())
 	
